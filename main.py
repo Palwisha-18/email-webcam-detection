@@ -3,6 +3,7 @@ import os
 import time
 
 import cv2
+from threading import Thread
 
 from send_email import send_email
 
@@ -53,8 +54,12 @@ while True:
     status_list = status_list[-2:]
 
     if status_list[0] == 1 and status_list[1] == 0:
-        send_email(image_with_object)
-        clear_folder()
+        email_thread = Thread(target=send_email, args=(image_with_object, ))
+        email_thread.daemon = True
+        clear_folder_thread = Thread(target=clear_folder)
+        email_thread.daemon = True
+
+        email_thread.start()
 
     cv2.imshow("MY video", frame)
 
@@ -63,3 +68,4 @@ while True:
         break
 
 video.release()
+clear_folder_thread.start()
